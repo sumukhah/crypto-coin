@@ -1,6 +1,6 @@
-const Block = require("./block");
-const { GENESIS_DATA, MINE_RATE } = require("./config");
-const { sha256 } = require("./crypto");
+const Block = require("../blockchain/block");
+const { GENESIS_DATA, MINE_RATE } = require("../config");
+const { sha256 } = require("../utils/crypto");
 
 describe("Block", () => {
   const data = ["blockchain", "data"];
@@ -69,7 +69,7 @@ describe("Block", () => {
       );
     });
     it("difficulty adjusted automatically", () => {
-      const possibleValues = [
+      const possibleValues1 = [
         lastBlock.difficulty + 1,
         lastBlock.difficulty - 1,
       ];
@@ -82,7 +82,7 @@ describe("Block", () => {
         lastBlock: minedBlock,
       });
 
-      expect(possibleValues.includes(minedBlock.difficulty)).toBe(true);
+      expect(possibleValues1.includes(minedBlock.difficulty)).toBe(true);
       expect(possibleValues2.includes(anotherNewBlock.difficulty)).toBe(true);
     });
 
@@ -91,7 +91,7 @@ describe("Block", () => {
         expect(
           Block.adjustDifficulty({
             originalBlock: block,
-            timestamp: block.timestamp + MINE_RATE - 50,
+            timestamp: block.timestamp + MINE_RATE - 500,
           })
         ).toBe(block.difficulty + 1);
       });
@@ -100,9 +100,9 @@ describe("Block", () => {
         expect(
           Block.adjustDifficulty({
             originalBlock: block,
-            timestamp: block.timestamp + MINE_RATE + 50,
+            timestamp: block.timestamp + MINE_RATE + 500,
           })
-        ).toBe(block.difficulty - 1);
+        ).toBe(block.difficulty - 1 || 1);
       });
     });
   });

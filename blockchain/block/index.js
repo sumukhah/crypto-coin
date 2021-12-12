@@ -1,5 +1,5 @@
-const { GENESIS_DATA, MINE_RATE } = require("./config.js");
-const { sha256 } = require("./crypto.js");
+const { GENESIS_DATA, MINE_RATE } = require("../../config");
+const { sha256 } = require("../../utils/crypto");
 
 class Block {
   static mineBlock({ lastBlock, data }) {
@@ -29,8 +29,8 @@ class Block {
   }
 
   static adjustDifficulty({ originalBlock, timestamp }) {
-    if (originalBlock.difficulty <= 1) return 1;
     if (timestamp - originalBlock.timestamp > MINE_RATE) {
+      if (originalBlock.difficulty <= 1) return 1;
       return originalBlock.difficulty - 1;
     }
 

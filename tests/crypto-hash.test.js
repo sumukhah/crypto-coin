@@ -1,4 +1,4 @@
-const { sha256 } = require("./crypto");
+const { sha256 } = require("../utils/crypto");
 
 describe("hash()", () => {
   const hashedString = sha256("hello", "hi");

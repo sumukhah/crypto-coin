@@ -1,7 +1,7 @@
-const { sha256 } = require("./crypto");
+const { sha256 } = require("../utils/crypto");
 
 const INITIAL_DIFFICULTY = 2; // sets the initial difficulty of the genesis block, which will be carried to further blocks
-const MINE_RATE = 1000; // mining difficulty adjusted
+const MINE_RATE = 20; // mining difficulty adjusted
 
 const GENESIS_DATA = {
   timestamp: +new Date("01/01/2000"),
@@ -14,7 +14,8 @@ const GENESIS_DATA = {
 GENESIS_DATA.hash = sha256(
   GENESIS_DATA.data,
   GENESIS_DATA.lastBlock,
-  GENESIS_DATA.timestamp
+  GENESIS_DATA.timestamp,
+  GENESIS_DATA.difficulty,
+  GENESIS_DATA.nonce
 );
-
 module.exports = { GENESIS_DATA, MINE_RATE };

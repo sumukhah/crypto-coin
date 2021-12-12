@@ -1,6 +1,6 @@
-const { BlockChain } = require("./blockchain");
-const { GENESIS_DATA } = require("./config.js");
-const { sha256 } = require("./crypto");
+const { BlockChain } = require("../blockchain");
+const { GENESIS_DATA } = require("../config");
+const { sha256 } = require("../utils/crypto");
 
 describe("Block chain", () => {
   let blockchain;
@@ -27,8 +27,13 @@ describe("Block chain", () => {
 
     describe("when the chain does't start with genesis block", () => {
       it("should return false ", () => {
+        console.error = jest.fn();
+        // jest.spyOn(console, "error").mockImplementation((a) => {
+        //   // console.log(a);
+        // });
         blockchain.chain[0].data = "tampered-data";
         expect(BlockChain.isValidChain(blockchain.chain)).toBe(false);
+        expect(console.error).toHaveBeenCalled();
       });
     });
 

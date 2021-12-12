@@ -1,5 +1,5 @@
 const Block = require("./block");
-const { sha256 } = require("./crypto.js");
+const { sha256 } = require("../utils/crypto.js");
 
 class BlockChain {
   chain = [];
@@ -18,6 +18,7 @@ class BlockChain {
 
   static isValidChain(chain) {
     if (JSON.stringify(chain[0]) !== JSON.stringify(Block.genesis())) {
+      console.error("doesn't start with valid genesis");
       return false;
     }
     for (let i = 1; i < chain.length; i++) {
@@ -28,6 +29,7 @@ class BlockChain {
 
       const hash = sha256(timestamp, data, lastBlock, difficulty, nonce);
       if (hash !== block.hash) {
+        console.error("not a valid block");
         return false;
       }
     }
@@ -36,15 +38,17 @@ class BlockChain {
 
   replaceChain(newChain) {
     if (newChain.length <= this.chain.length) {
-      // console.log("new chain is not longer");
+      console.error("new chain is not longer");
       return;
     }
     if (!BlockChain.isValidChain(newChain)) {
+      console.error("new chain is not valid");
       return;
     }
-
     this.chain = newChain;
+    console.info("block chian is synced");
   }
 }
 
-module.exports = { BlockChain };
+const blockchain = new BlockChain();
+module.exports = { BlockChain, blockchain };
