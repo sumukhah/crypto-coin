@@ -4,7 +4,7 @@ describe("hash()", () => {
   const hashedString = sha256("hello", "hi");
   it("can convert to sha256 hash", () => {
     expect(hashedString).toBe(
-      "410e5242e95f786806b210a1cc997196709c22c5c6a1a00fd1e77c6ec203ff5d"
+      "fd0d94455d6dcd20c5e3b9f70c7cd0227ff99f55640824cd4230475fa72bf7f5"
     );
   });
   it("won`t consider the position of arguments", () => {

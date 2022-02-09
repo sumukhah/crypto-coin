@@ -3,6 +3,9 @@ const { GENESIS_DATA } = require("../config");
 const { sha256 } = require("../utils/crypto");
 
 describe("Block chain", () => {
+  jest.spyOn(console, "info").mockImplementation((a) => {
+    // console.log(a);
+  });
   let blockchain;
   beforeEach(() => {
     blockchain = new BlockChain();
