@@ -18,4 +18,7 @@ GENESIS_DATA.hash = sha256(
   GENESIS_DATA.difficulty,
   GENESIS_DATA.nonce
 );
-module.exports = { GENESIS_DATA, MINE_RATE };
+
+MINING_REWARD = 50;
+REWARD_TRANSACTION = { address: "*authorized-reward*" };
+module.exports = { GENESIS_DATA, MINE_RATE, MINING_REWARD, REWARD_TRANSACTION };

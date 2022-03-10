@@ -5,8 +5,13 @@ const { sha256 } = require("./crypto");
 const ec = new EC("secp256k1");
 
 const verifySignature = (publicKey, message, signature) => {
-  const key = ec.keyFromPublic(publicKey, "hex");
-  return key.verify(sha256(message), signature);
+  try{
+    const key = ec.keyFromPublic(publicKey, "hex");
+    return key.verify(sha256(message), signature);
+  } catch(e) {
+    return false
+  }
+  
   // console.log(signature);
   // console.log(signature.verify(sha256(message)), "what");
   // console.log(signature, "sign");

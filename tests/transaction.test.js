@@ -1,6 +1,7 @@
 const Transaction = require("../transaction");
 const { verifySignature } = require("../utils/ellipticCurve");
 const Wallet = require("../wallet");
+const { MINING_REWARD, REWARD_TRANSACTION } = require("../config");
 
 describe("Transactions", () => {
   let transaction, senderWallet, recipient, amount;
@@ -100,7 +101,6 @@ describe("Transactions", () => {
     });
 
     it("subtracts amount from original sender wallet", () => {
-      console.log(originalOutput, nextAmount);
       expect(transaction.outputMap[senderWallet.publicKey]).toBe(
         originalOutput - nextAmount
       );
@@ -116,6 +116,7 @@ describe("Transactions", () => {
     it("should update the signature", () => {
       expect(newSignature).not.toEqual(oldSignature);
     });
+
     // it("should update the wallet balance", () => {
     //   expect(senderWallet.balance).toBe();
     // });
@@ -128,5 +129,21 @@ describe("Transactions", () => {
     //   console.log(transaction);
     // });
     // it("should update the outputMap", () => {});
+  });
+
+  describe("rewardTransaction()", () => {
+    let minerWallet, rewardTransaction;
+    beforeEach(() => {
+      minerWallet = new Wallet();
+      rewardTransaction = transaction.rewardTransaction({ minerWallet });
+    });
+
+    test("creates a transaction for minor with the reward input", () => {
+      expect(rewardTransaction.input).toBe(MINING_REWARD);
+    });
+
+    test("creates a transaction object for minor", () => {
+      expect(rewardTransaction).toBe(REWARD_TRANSACTION);
+    });
   });
 });

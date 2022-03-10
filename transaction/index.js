@@ -45,6 +45,9 @@ class Transaction {
   }
 
   update({ recipient, senderWallet, amount }) {
+    if (amount > senderWallet.balance) {
+      throw Error("Invalid amount");
+    }
     this.outputMap[recipient] = amount;
     this.outputMap[senderWallet.publicKey] -= amount;
     this.createInputMap({ senderWallet });

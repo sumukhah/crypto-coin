@@ -4,7 +4,7 @@ const Transaction = require("../transaction");
 class Wallet {
   constructor() {
     // this.publicKeys = [];
-    this.balance = 1000;
+    this.balance = 100;
     this.generateKeys();
   }
   generateKeys() {
