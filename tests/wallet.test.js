@@ -1,6 +1,8 @@
 const Wallet = require("../wallet");
 const { verifySignature } = require("../utils/ellipticCurve");
 const Transaction = require("../transaction");
+const { BlockChain } = require("../blockchain/index");
+const { INITIAL_BALANCE } = require("../config/index");
 //  bitcoin use public key cryptography to create a key pair that controls
 // access to bitcoins. The key pair consists of a private key and—derived from
 // it—a unique public key. The public key is used to receive bitcoins, and the
@@ -25,12 +27,7 @@ describe("Wallet", () => {
   });
 
   describe("signData", () => {
-    let wallet;
     const message = "foo-bar";
-
-    beforeEach(() => {
-      wallet = new Wallet();
-    });
 
     it("should verify the signature using public keys", () => {
       const { publicKey } = wallet;
@@ -40,7 +37,6 @@ describe("Wallet", () => {
     });
 
     it("should not verify the signature using invalid public keys", () => {
-      const invalidPublicKey = "1".repeat(64);
       const newWallet = new Wallet();
       expect(
         verifySignature(newWallet.publicKey, message, wallet.sign(message))
@@ -78,6 +74,118 @@ describe("Wallet", () => {
       });
       it("should create the transacation", () => {
         expect(transaction.outputMap[recipient]).toBe(amount);
+      });
+    });
+
+    describe("when chain is passed", () => {
+      it("should call `Wallet.calculateBalance`", () => {
+        const mockFunction = jest.fn();
+        const calcBalance = Wallet.calculateBalance;
+        Wallet.calculateBalance = mockFunction;
+        wallet.createTransaction({
+          recipient: "foo",
+          amount: 20,
+          blockchain: new BlockChain(),
+        });
+        expect(mockFunction).toHaveBeenCalled();
+        Wallet.calculateBalance = calcBalance;
+      });
+    });
+  });
+  describe("calculateBalance()", () => {
+    let blockchain;
+    beforeEach(() => {
+      blockchain = new BlockChain();
+    });
+    describe("If no transaction made so far", () => {
+      it("should show the initial wallet balance", () => {
+        expect(
+          Wallet.calculateBalance({
+            publicKey: wallet.publicKey,
+            chain: blockchain.chain,
+          })
+        ).toBe(INITIAL_BALANCE);
+      });
+    });
+    describe("If wallet recieved transaction", () => {
+      let expectedBalance;
+      beforeEach(() => {
+        expectedBalance = 0;
+        for (let i = 0; i < 2; i++) {
+          const newWallet = new Wallet();
+          const transaction = newWallet.createTransaction({
+            recipient: wallet.publicKey,
+            amount: 20,
+          });
+          blockchain.addNewBlock({ data: [transaction] });
+
+          expectedBalance += 20;
+        }
+      });
+      it("should show remaining balance", () => {
+        expect(
+          Wallet.calculateBalance({
+            publicKey: wallet.publicKey,
+            chain: blockchain.chain,
+          })
+        ).toBe(expectedBalance + INITIAL_BALANCE);
+      });
+    });
+
+    describe("If wallet has made a trasaction", () => {
+      let recentTransaction;
+      beforeEach(() => {
+        recentTransaction = wallet.createTransaction({
+          recipient: "foo",
+          amount: 20,
+        });
+        blockchain.addNewBlock({ data: [recentTransaction] });
+      });
+      it("should show output for recent transaction", () => {
+        expect(
+          Wallet.calculateBalance({
+            publicKey: wallet.publicKey,
+            chain: blockchain.chain,
+          })
+        ).toBe(recentTransaction.outputMap[wallet.publicKey]);
+      });
+
+      describe("if there are transaction in same or subsequent block", () => {
+        let sameBlockBalance, nextBlockBalance;
+        beforeEach(() => {
+          recentTransaction = wallet.createTransaction({
+            recipient: "fo-k",
+            amount: 50,
+          });
+          const recentTransaction1 = new Wallet().createTransaction({
+            recipient: wallet.publicKey,
+            amount: 20,
+          });
+          sameBlockBalance = Math.abs(
+            recentTransaction1.outputMap[wallet.publicKey] +
+              recentTransaction.outputMap[wallet.publicKey]
+          );
+
+          blockchain.addNewBlock({
+            data: [recentTransaction, recentTransaction1],
+          });
+
+          const nextTransaction = new Wallet().createTransaction({
+            recipient: wallet.publicKey,
+            amount: 20,
+          });
+          blockchain.addNewBlock({
+            data: [nextTransaction],
+          });
+          nextBlockBalance = nextTransaction.outputMap[wallet.publicKey];
+        });
+        it("includes output balance in the returned balance", () => {
+          const amount = Wallet.calculateBalance({
+            publicKey: wallet.publicKey,
+            chain: blockchain.chain,
+          });
+          expect(amount).toBe(nextBlockBalance + sameBlockBalance);
+        });
       });
     });
   });

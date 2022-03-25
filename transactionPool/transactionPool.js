@@ -10,10 +10,24 @@ class TransactionPool {
       (transaction) => transaction.input.sender === inputAddress
     );
   }
+  clear() {
+    this.transactionMap = {};
+  }
 
   replaceTransactionMap = (transactionMap) => {
     this.transactionMap = transactionMap;
   };
+
+  clearDoubleSpends(blockchain) {
+    const { chain } = blockchain;
+    for (i = 1; i < chain.length; i++) {
+      for (let transaction of chain[i].data) {
+        if (this.transactionMap[transaction.id]) {
+          delete this.transactionMap[transaction.id];
+        }
+      }
+    }
+  }
 
   getValidTransactions = () => {
     const validTransactions = [];

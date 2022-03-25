@@ -19,6 +19,17 @@ GENESIS_DATA.hash = sha256(
   GENESIS_DATA.nonce
 );
 
+const INITIAL_BALANCE = 500;
+
 MINING_REWARD = 50;
-REWARD_TRANSACTION = { address: "*authorized-reward*" };
-module.exports = { GENESIS_DATA, MINE_RATE, MINING_REWARD, REWARD_TRANSACTION };
+REWARD_TRANSACTION = {
+  sender: "*authorized-reward*",
+  amount: MINING_REWARD,
+};
+module.exports = {
+  GENESIS_DATA,
+  MINE_RATE,
+  MINING_REWARD,
+  REWARD_TRANSACTION,
+  INITIAL_BALANCE,
+};

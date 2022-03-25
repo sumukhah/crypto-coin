@@ -35,9 +35,8 @@ const syncWithRoot = async () => {
 
     // get the blockchain from root node
     response = await axios.get(`${DEFAULT_ROOT_NODE}/app/block`);
-    console.log(response);
   } catch (e) {
-    console.log(e);
+    console.log(e.message);
   }
   // transactionPool.replaceTransactionMap()
 };
@@ -56,7 +55,6 @@ app.post("/app/mine", (req, res) => {
 });
 
 app.get("/app/transaction-pool-map", (req, res) => {
-  console.log(transactionPool.transactionMap, "hey bro");
   return res.json(transactionPool.transactionMap);
 });
 
@@ -84,6 +82,16 @@ app.post("/app/transaction", (req, res) => {
   // brodcast new transaction to all peers
   p2pConnection.brodcastTransactions(transaction);
   res.json({ type: "success", transaction });
+});
+
+app.get("/app/wallet", (req, res) => {
+  res.json({
+    address: wallet.publicKey,
+    balance: Wallet.calculateBalance({
+      publicKey: wallet,
+      chain: blockchain.chain,
+    }),
+  });
 });
 
 if (process.env.GENERATE_PORT === "true") {

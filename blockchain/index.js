@@ -1,5 +1,8 @@
 const Block = require("./block");
 const { sha256 } = require("../utils/crypto.js");
+const { REWARD_TRANSACTION } = require("../config");
+const Transaction = require("../transaction");
+const Wallet = require("../wallet");
 
 class BlockChain {
   chain = [];
@@ -45,8 +48,45 @@ class BlockChain {
       console.error("new chain is not valid");
       return;
     }
+    if (!this.validTransactionsData({ chain: newChain })) {
+      console.log("invalid transactions in new chain");
+    }
     this.chain = newChain;
     console.info("block chian is synced");
+  }
+
+  validTransactionsData({ chain }) {
+    for (let i = 1; i < chain.length; i++) {
+      let rewardCount = 0;
+      const blockTransactions = {};
+      for (let transaction of chain[i].data) {
+        if (blockTransactions[transaction.id]) {
+          console.error("Duplicate transactions");
+          return false;
+        } else {
+          blockTransactions[transaction.id] = true;
+        }
+        if (transaction.input.sender === REWARD_TRANSACTION.sender) {
+          rewardCount += 1;
+        }
+        if (!Transaction.isValidTransaction(transaction)) {
+          return false;
+        }
+        if (transaction.input.sender !== REWARD_TRANSACTION.sender) {
+          const trueBalance = Wallet.calculateBalance({
+            chain: this.chain,
+            publicKey: transaction.input.sender,
+          });
+          if (trueBalance !== transaction.input.amount) {
+            console.error("malformed wallet detected");
+            return false;
+          }
+        }
+      }
+      if (rewardCount > 1) return false;
+    }
+
+    return true;
   }
 }
 

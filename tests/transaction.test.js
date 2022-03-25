@@ -116,34 +116,23 @@ describe("Transactions", () => {
     it("should update the signature", () => {
       expect(newSignature).not.toEqual(oldSignature);
     });
-
-    // it("should update the wallet balance", () => {
-    //   expect(senderWallet.balance).toBe();
-    // });
-    // const {input, outputMap, signature} =
-
-    // it("should update the amount", () => {
-    //   expect(senderWallet.balance).toBe(transaction.outputMap);
-    // });
-    // it("should update the input", () => {
-    //   console.log(transaction);
-    // });
-    // it("should update the outputMap", () => {});
   });
 
   describe("rewardTransaction()", () => {
     let minerWallet, rewardTransaction;
     beforeEach(() => {
       minerWallet = new Wallet();
-      rewardTransaction = transaction.rewardTransaction({ minerWallet });
+      rewardTransaction = Transaction.rewardTransaction({ minerWallet });
     });
 
-    test("creates a transaction for minor with the reward input", () => {
-      expect(rewardTransaction.input).toBe(MINING_REWARD);
+    test("creates a transaction for miner with the reward input", () => {
+      expect(rewardTransaction.input).toBe(REWARD_TRANSACTION);
     });
 
-    test("creates a transaction object for minor", () => {
-      expect(rewardTransaction).toBe(REWARD_TRANSACTION);
+    test("creates a transaction object for miner", () => {
+      expect(rewardTransaction.outputMap[minerWallet.publicKey]).toBe(
+        MINING_REWARD
+      );
     });
   });
 });

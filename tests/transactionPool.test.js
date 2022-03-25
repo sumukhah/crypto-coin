@@ -1,6 +1,7 @@
 const TransactionPool = require("../transactionPool/transactionPool.js");
 const Transaction = require("../transaction/index");
 const Wallet = require("../wallet/index");
+const { blockchain } = require("../blockchain/index");
 
 describe("Transaction Pool", () => {
   let transaction, transactionPool, senderWallet;
@@ -60,6 +61,35 @@ describe("Transaction Pool", () => {
 
     it("get all valid transaction from pool", () => {
       expect(transactionPool.getValidTransactions()).toEqual(validTransactions);
+    });
+  });
+  describe("clearDoubleSpend()", () => {
+    it("clear existing block chain transaction from pool/double spend", () => {
+      const expectedTransactions = {};
+
+      for (let i = 0; i < 6; i++) {
+        const transaction = new Transaction({
+          amount: 20,
+          recipient: `fake-recepient=${i}`,
+          senderWallet: new Wallet(),
+        });
+        transactionPool.setTransaction(transaction);
+
+        if (i % 2 === 0) {
+          blockchain.addNewBlock({ data: [transaction] });
+        } else {
+          expectedTransactions[transaction.id] = transaction;
+        }
+      }
+      transactionPool.clearDoubleSpends(blockchain);
+      expect(transactionPool.transactionMap).toEqual(expectedTransactions);
+    });
+  });
+
+  describe("clear()", () => {
+    it("should clear the transaction in pool", () => {
+      transactionPool.clear();
+      expect(transactionPool.transactionMap).toEqual({});
     });
   });
 });
